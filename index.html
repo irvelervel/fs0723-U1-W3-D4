@@ -1,0 +1,58 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./assets/styles.css" />
+    <title>EpiCalendar</title>
+  </head>
+
+  <body>
+    <div class="container">
+      <main>
+        <h1></h1>
+        <div id="calendar">
+          <!-- le celle dei giorni verranno generate via JS e posizionate qui -->
+        </div>
+
+        <h2>Add Meeting</h2>
+        <div id="addMeeting">
+          <div>
+            <h4>Meeting Day</h4>
+            <span id="newMeetingDay">Click on a Day</span>
+          </div>
+          <form>
+            <div>
+              <h4>Meeting Time</h4>
+              <input type="time" id="newMeetingTime" required />
+            </div>
+            <div>
+              <h4>Meeting Name</h4>
+              <input
+                type="text"
+                id="newMeetingName"
+                placeholder="Insert a name for the meeting"
+                required
+              />
+            </div>
+            <div>
+              <h4>Add</h4>
+              <button>Save Meeting</button>
+            </div>
+          </form>
+        </div>
+      </main>
+      <!-- questa sezione è normalmente nascosta, fino a che non la si rende visibile tramite JS -->
+      <section>
+        <div id="appointments">
+          <h2>Appointments For the Day:</h2>
+          <ul id="appointmentsList">
+            <!-- nel caso vi siano appuntamenti da mostrare, verranno generati via JS dei <li> e posizionati qui -->
+          </ul>
+        </div>
+      </section>
+    </div>
+
+    <script src="./js/index.js"></script>
+  </body>
+</html>
