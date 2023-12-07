@@ -135,6 +135,19 @@ const createCalendarCells = function (days) {
       const selectedDaySpan = document.getElementById('newMeetingDay')
       selectedDaySpan.innerText = i + 1 // lo stesso valore che aveva la cella su cui ho cliccato
       selectedDaySpan.classList.add('hasDay') // ingrandisce un po' il font-size dello span...
+
+      // nel caso ci siano eventi nel giorno che ho appena cliccato
+      // mostra la sezione Appointments for the day! altrimenti... nascondila!
+      if (
+        // se ci sono eventi per questo giorno che ho cliccato
+        events[i].length > 0
+      ) {
+        // mostro la sezione appointments per questo giorno!
+        showAppointmentsForOneDay(i)
+      } else {
+        // se qui dentro non ho trovato eventi, per sicurezza ri-nascondo la sezione appointments!
+        document.getElementById('appointments').style.display = 'none'
+      }
     })
 
     // creo il contenuto della cella, un h3 con valore i + 1
@@ -164,6 +177,32 @@ const createCalendarCells = function (days) {
     events.push([])
   }
 }
+
+// creiamo la funzione che mostrerà gli eventi di una singola giornata, abilitando la parte nascosta nel DOM
+const showAppointmentsForOneDay = function (cassettinoIndex) {
+  // questa funzione si occuperà di:
+  // 1) prelevare da uno dei cassettini gli eventi nel caso ve ne siano
+  const eventsForTheDay = events[cassettinoIndex]
+  // 2) riempire la lista già esistente in HTML (vuota), con tanti <li> quanti sono gli eventi da mostrare
+  // prendo la lista  vuota
+  const eventsList = document.getElementById('appointmentsList')
+  eventsList.innerHTML = ''
+  // ora genero gli li per la lista
+  for (let i = 0; i < eventsForTheDay.length; i++) {
+    // eventsForTheDay[i] rappresenta un evento nel cassettino
+    const newLi = document.createElement('li')
+    // <li></li>
+    newLi.innerText = eventsForTheDay[i] // "12:00 Pranzo di Natale!"
+    eventsList.appendChild(newLi)
+  }
+  // 3) mostrare la sezione nascosta
+  // prendo un riferimento al contenitore della lista, che di default ha "display: none"
+  const eventListContainer = document.getElementById('appointments')
+  eventListContainer.style.display = 'block' // la devo fare inline, perchè altrimenti non vinco contro il selettore di id in CSS
+}
+
+// es. showAppointmentsForOneDay(5)
+// es. showAppointmentsForOneDay(24)
 
 // FLUSSO OPERATIVO: esecuzioni delle funzioni
 // si stampa il mese corrente
@@ -214,6 +253,7 @@ formReference.addEventListener('submit', function (e) {
   document.getElementById('newMeetingName').value = ''
 
   // controllo se su questa cella è già presente un elemento "dot"
+  const dayCellNode = document.querySelector('.selected')
   const isDot = dayCellNode.querySelector('.dot')
   // nel caso nella cella non ci sia già presente un elemento "dot", non la creeremo di nuovo
   if (!isDot) {
@@ -227,4 +267,7 @@ formReference.addEventListener('submit', function (e) {
     const selectedCell = document.getElementsByClassName('selected')[0]
     selectedCell.appendChild(dot)
   }
+
+  // ora sarebbe il caso di mostrare la lista per far vedere l'evento che ho appena creato!
+  showAppointmentsForOneDay(rightCassettinoIndex)
 })
