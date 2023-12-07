@@ -51,7 +51,8 @@ const printCurrentMonthInH1 = function () {
   const currentMonth = monthNames[indexOfTheCurrentMonth] // "Dicembre"
   console.log('il currentMonth è', currentMonth)
   // troviamo un riferimento per quell'h1
-  const h1Title = document.querySelector('h1')
+  //   const h1Title = document.querySelector('h1')
+  const h1Title = document.getElementsByTagName('h1')[0]
   // riempiamo il contenuto di h1Title con currentMonth
   h1Title.innerText = currentMonth
 }
@@ -82,6 +83,24 @@ const numberOfDaysInThisMonth = function () {
   return lastNumericDayOfThisMonth // in questo caso 31
 }
 
+const unselectPreviousDays = function () {
+  // approccio BULLDOZER
+  // seleziono TUTTE LE CELLE e nel dubbio tolgo "selected" a TUTTE :)
+  //   const allTheDayCells = document.getElementsByClassName('day') // tutte le celle
+  //   for (let i = 0; i < allTheDayCells.length; i++) {
+  //     allTheDayCells[i].classList.remove('selected')
+  //   }
+
+  // approccio chirurgico
+  const previousSelected = document.getElementsByClassName('selected')[0] // precedente cella con "selected", se c'è!
+  if (previousSelected) {
+    // sarebbe come dire if (typeof previousSelected !== undefined) {
+    // solo se previousSelected NON è undefined...
+    // se il click non è il primo
+    previousSelected.classList.remove('selected') // toglie la classe CSS "selected" dall'elemento
+  }
+}
+
 const createCalendarCells = function (days) {
   // questa funzione è dedicata alla creazione delle celle nella sezione del calendario
   // ha bisogno di capire quante celle creare!
@@ -99,6 +118,24 @@ const createCalendarCells = function (days) {
     // <div></div>
     dayCellDiv.classList.add('day') // rendo la cella cliccabile, alta tot, larga tot, con bordo arrotondato etc. etc. (vedi css)
     // <div class="day"></div>
+
+    // rendiamo le celle cliccabili!
+    dayCellDiv.addEventListener('click', function (e) {
+      // cosa deve succedere su una cella quando ci clicco sopra?
+      // prima di tutto, la vorrei impostare come "selezionata"
+      // ma devo anche togliere la classe "selected" da un eventuale elemento che già la possiede
+
+      unselectPreviousDays()
+
+      dayCellDiv.classList.add('selected')
+
+      // utilizziamo il numero della cella su cui ho cliccato
+      // come nuovo valore dell'elemento in basso a sx "Meeting Day"
+      // seleziono quello span
+      const selectedDaySpan = document.getElementById('newMeetingDay')
+      selectedDaySpan.innerText = i + 1 // lo stesso valore che aveva la cella su cui ho cliccato
+      selectedDaySpan.classList.add('hasDay') // ingrandisce un po' il font-size dello span...
+    })
 
     // creo il contenuto della cella, un h3 con valore i + 1
     const cellValue = document.createElement('h3')
@@ -123,7 +160,7 @@ const createCalendarCells = function (days) {
     calendarDiv.appendChild(dayCellDiv) // appendo la cella "day" alla sezione vuota con id "calendar"
     // }, 1000 * (i + 1))
 
-    // creo anche il mini-array dentro events per la giornata corrente
+    // creo anche il mini-array dentro events per la giornata corrente (il "cassettino")
     events.push([])
   }
 }
@@ -141,3 +178,53 @@ createCalendarCells(numberOfDays) // qui dentro riempio anche la cassettiera, ch
 
 // calendario "base" completo! ora inseriamo la feature di "aggiunta eventi"
 console.log(events) // vediamo dopo il ciclo for dei giorni quanti cassettini ha la cassettiera
+
+// ora occupiamoci di lavorare con il form per il new meeting: dobbiamo raccogliere giorno, ora e nome
+// per salvare un evento nel "cassettino" giusto!
+
+const formReference = document.getElementsByTagName('form')[0]
+// const formReference = document.querySelector('form')
+formReference.addEventListener('submit', function (e) {
+  e.preventDefault() // altrimenti la pagina si aggiorna!
+  // ora possiamo lavorarci :)
+
+  // devo comporre la stringa che salverò nel cassettino giusto
+  // recupero il giorno selezionato
+  const selectedDay = document.getElementById('newMeetingDay').innerText // '24', '31', '4', etc.
+  // recuperiamo il valore dell'input time
+  const meetingTime = document.getElementById('newMeetingTime').value // .value perchè è un input! non un h1, span, p, etc. -> "12:00"
+  const meetingName = document.getElementById('newMeetingName').value // "Pranzo di Natale!"
+
+  // abbiamo tutti i pezzi! ora componiamo la stringa da salvare:
+  const meetingString = meetingTime + ' - ' + meetingName // "12:00 - Pranzo di Natale!"
+  //   const meetingString = `${meetingTime} - ${meetingName}` // "12:00 - Pranzo di Natale!"
+  //   const meetingString = meetingTime.concat(' - ').concat(meetingName) // "12:00 - Pranzo di Natale!"
+
+  // ora devo solamente inserire la mia stringa dentro il "cassettino" giusto!
+  // il cassettino giusto me lo dice selectedDay! però attenzione che dovrò sottrarci 1
+
+  const rightCassettinoIndex = parseInt(selectedDay) - 1 // '25' -> diventa 24
+  events[rightCassettinoIndex].push(meetingString)
+
+  // ecco come si mostra la cassettiera dopo ogni push in un cassettino!
+  console.log('EVENTS DOPO', events)
+
+  // svuoto il form al termine del salvataggio
+  document.getElementById('newMeetingTime').value = ''
+  document.getElementById('newMeetingName').value = ''
+
+  // controllo se su questa cella è già presente un elemento "dot"
+  const isDot = dayCellNode.querySelector('.dot')
+  // nel caso nella cella non ci sia già presente un elemento "dot", non la creeremo di nuovo
+  if (!isDot) {
+    // solo se nella cella non è già stato creato un elemento "dot"
+
+    // evidenziamo il giorno selezionato nel calendario per mostrare che ha almeno un evento!
+    const dot = document.createElement('span')
+    dot.classList.add('dot')
+    // trovo la cella "day" selected
+    // const selectedCell = document.querySelector('.selected') <-- RIP orsi polari
+    const selectedCell = document.getElementsByClassName('selected')[0]
+    selectedCell.appendChild(dot)
+  }
+})
